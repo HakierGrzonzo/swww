@@ -26,14 +26,24 @@ jobs:
       - name: Generate manpages
         run: ./doc/gen.sh
 
+      - name: Package into a zip file
+        if: startswith(github.ref, 'refs/tags/')
+        run: |
+          zip swww-${{github.ref_name}}-amd64.zip \
+          CHANGELOG.md \
+          LICENSE \
+          README.md \
+          completions/* \
+          doc/generated/* \
+          target/release/swww \
+          target/release/swww-daemon
+
       - name: Generate release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startswith(github.ref, 'refs/tags/')
         with:
-          files: |
-            target/release/swww
-            target/release/swww-daemon
-            doc/generated
+          files: swww-${{github.ref_name}}-amd64.zip
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
